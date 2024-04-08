@@ -9,7 +9,7 @@ const createUser = require('./routes/Createuser')
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/your-database', {
+mongoose.connect(process.env.DB_CONNECTING_STRING, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -20,9 +20,10 @@ app.use(cors());
 // Routes
 app.use('/images', imageRoutes);
 app.use('/user',createUser);
-
+// defalut Route
+app.get('/',(req,res)=>{
+  res.send("working");
+})
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT);

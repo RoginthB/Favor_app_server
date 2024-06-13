@@ -1,6 +1,42 @@
-
+//const Image = require('./image');
 const mongoose = require('mongoose');
-
+const imageSchema = new mongoose.Schema({
+	// imageName: {
+	//   type: String,
+	//   required: true,
+	// },
+	// imagePath: {
+	//   type: String,
+	//   required: true,
+	// },
+	title: {
+	  type: String,
+	  required: true,
+	},
+	description: {
+	  type: String,
+	  required: true,
+	},
+	israted: {
+	  type:Boolean,
+	  required: true,
+	},
+	rating:{
+	  type:Number,
+	  required: true,
+	},
+	 userName:{
+	  type:String,
+	  required: true,
+  
+	},
+	userId:{
+	  type:String,
+	  required: true,
+	},
+  
+  });
+  
 const newUserSchema = new mongoose.Schema({
    	name: {
    		type:String,
@@ -22,18 +58,9 @@ const newUserSchema = new mongoose.Schema({
    		type:String,
    		require:true,
    	},
-   	followers :{
-   		type:Number,
-   		requrie:true,
-   	},
-   	following :{
-   		type:Number,
-   		require:true,
-   	},
-   	post:{
-   		type:Number,
-   		require:true,
-   	},
+   	followers :[{}],
+   	following :[{}],
+   	post:[imageSchema],
    	userId:{
    		type:String,
    		require:true,

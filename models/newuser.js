@@ -1,14 +1,13 @@
 //const Image = require('./image');
-const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const imageSchema = new mongoose.Schema({
-	imageName: {
-	  type: String,
-	  required: true,
-	},
+	// imageName: {
+	//   type: String,
+	//   required: true,
+	// },
 	imagePath: {
-	  type: String,
-	  required: true,
+	  type: Buffer,
+	  required: false,
 	},
 	title: {
 	  type: String,
@@ -36,8 +35,8 @@ const imageSchema = new mongoose.Schema({
 	  required: true,
 	},
 	userUniqId:{
-		type:ObjectId,
-		required:true,
+		type:String,
+		required: true,
 	},
   
   });

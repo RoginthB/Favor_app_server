@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const imageRoutes = require('./routes/imageRoutes');
 const createUser = require('./routes/Createuser')
 
-const app = express();
+const app = express({limit:'50mb'});
 
 // Connect to MongoDB
 mongoose.connect(process.env.DB_CONNECTING_STRING, {

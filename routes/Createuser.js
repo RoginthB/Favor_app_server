@@ -100,21 +100,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 // post Image
-router.post("/:id/upload", upload.single("image"), async (req, res) => {
+router.post("/:id/upload", async (req, res) => {
   try {
-    const { title, description, israted, rating} = req.body;
+    //console.log(req.body);
+    const { title, description,image, israted, rating} = req.body;
     const id = req.params.id;
     const user = await NewUser.findById(id);
     const newImage = new Image({
-      imageName: req.file.filename,
-      imagePath: req.file.path,
+      imagePath: image,
       title,
       description,
       israted,
       rating,
       userName: user.name,
       userId: user.userId,
-      userUniqId:user._id
+      userUniqId : user._id
     });
     
     if (user) {
@@ -123,7 +123,8 @@ router.post("/:id/upload", upload.single("image"), async (req, res) => {
         { $push: { post: newImage } }
       );
       if (result.modifiedCount > 0) {
-        res.status(200).send({ message: "updated successfully." });
+        let user = await NewUser.findById(id);
+        res.status(200).send(user);
       } else {
         res.status(203).send({ message: " not updated successfully." });
       }

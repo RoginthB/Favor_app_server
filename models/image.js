@@ -1,4 +1,5 @@
 // server/models/Image.js
+const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
 const imageSchema = new mongoose.Schema({
@@ -33,6 +34,10 @@ const imageSchema = new mongoose.Schema({
   },
   userId:{
     type:String,
+    required: true,
+  },
+  userUniqId: {
+    type: ObjectId,
     required: true,
   },
 

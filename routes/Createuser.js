@@ -12,21 +12,21 @@ router.get("/login/:email", async (req, res) => {
 });
 
 //login API
-router.post("/login", async(req,res)=>{
-  const user = await NewUser.findOne({email:req.body.email});
-  if(user === null){
-    res.status(205).send({message:"User not found."} )
+router.post("/login", async (req, res) => {
+  const user = await NewUser.findOne({ email: req.body.email });
+  if (user === null) {
+    res.status(205).send({ message: "User not found." });
   }
   try {
-    if (await bcrypt.compare(req.body.password, user.password )){
+    if (await bcrypt.compare(req.body.password, user.password)) {
       res.status(200).send(user);
-    }else{
-      res.status(203).send({message:"Wrong Password"});
+    } else {
+      res.status(203).send({ message: "Wrong Password" });
     }
   } catch (error) {
     res.status(500).send();
-  } 
-})
+  }
+});
 // New user Create API
 router.post("/newuser", async (req, res) => {
   try {
@@ -67,7 +67,6 @@ router.post("/newuser", async (req, res) => {
   }
 });
 
-
 // Get all images API
 router.get("/images", async (req, res) => {
   const data = await NewUser.find({});
@@ -80,12 +79,13 @@ router.get("/images", async (req, res) => {
 
 router.put("/:id/image", async (req, res) => {
   console.log(req.params.id);
-  const image = await NewUser.find({ post: [{ _id: req.params.id }] });
+  const image = await NewUser.find({"post._id": req.params.id });
   console.log(image);
   await NewUser.findOneAndUpdate(
     { post: { _id: req.params.id } },
-    { $set: { post: [{ rating: +1 }] } }
+    { $set: { "post.rating": {$add: [ 5,  1]}} }
   );
+  console.log()
   res.json({ message: " rated successfully." });
 });
 
@@ -103,7 +103,16 @@ const upload = multer({ storage: storage });
 router.post("/:id/upload", async (req, res) => {
   try {
     //console.log(req.body);
-    const { title, description,image, israted, rating} = req.body;
+    const {
+      title,
+      description,
+      image,
+      israted,
+      rating,
+      userName,
+      userId,
+      userUniqId,
+    } = req.body;
     const id = req.params.id;
     const user = await NewUser.findById(id);
     const newImage = new Image({
@@ -112,11 +121,11 @@ router.post("/:id/upload", async (req, res) => {
       description,
       israted,
       rating,
-      userName: user.name,
-      userId: user.userId,
-      userUniqId : user._id
+      userName,
+      userId,
+      userUniqId,
     });
-    
+
     if (user) {
       const result = await NewUser.updateOne(
         { _id: id },
@@ -148,7 +157,7 @@ router.post("/:id/upload", async (req, res) => {
 //       userId,
 //     });
 //   const user = await NewUser.findById(req.params.id);
-  
+
 //   if (user) {
 //       const result = await NewUser.updateOne(
 //         { _id: req.params.id },
@@ -181,43 +190,66 @@ router.post("/:id/upload", async (req, res) => {
 //   }
 // });
 
-// router.post('/:id/follower', async (req, res) => {
-//   //const user = await NewUser.find
-//   const user = await NewUser.find({ _id: req.params.id })
-//   const followerOrNot = false;
-//   user.followers.forEach(element => {
-//     if (element.email === req.body.email) {
-//       followerOrNot = true;
-//     }
-//   });
-//   if (followerOrNot) {
-//     res.json({ "message": "Alerady following. " })
-//   } else {
-//     const result = await NewUser.updateOne({ _id: req.params.id }, { $push: { followers: req.body } });
-//     if (result.modifiedCount > 0) {
-//       res.status(200).json({ "message": "Started following." })
-//     }
-//   }
+router.post("/:id/follower", async (req, res) => {
+  //const user = await NewUser.find
 
-// })
 
-// router.post('/:id/following', async (req, res) => {
-//   const user = await NewUser.find({ _id: req.params.id })
-//   const followingOrNot = false;
-//   user.following.forEach(element => {
-//     if (element.email === req.body.email) {
-//       followingOrNot = true;
-//     }
-//   });
-//   if (followingOrNot) {
-//     res.json({ "message": "Alerady following. " })
-//   } else {
-//     const result = await NewUser.updateOne({ _id: req.params.id }, { $push: { following: req.body } });
-//     if (result.modifiedCount > 0) {
-//       res.status(200).json({ "message": "Started following." })
-//     }
-//   }
+  const user = await NewUser.findOne({ _id: req.params.id });
 
-// })
+  const followingDetails = {
+    userName: user.name,
+    userUniqId: user._id,
+    email:  user.email,
+    startDateForFollow:  Date.now(),
+  };
+  let followerOrNot = false;
+  if (user.followers.length !== 0) {
+    user.followers.forEach((element) => {
+      if (element.email === req.body.email) {
+        followerOrNot = true;
+      }
+    });
+  }
+  if (followerOrNot) {
+    res.status(203).json({ message: "Alerady following. " });
+  } else {
+    const result = await NewUser.updateOne(
+      { _id: req.params.id },
+      { $push: { followers: req.body } }
+    );
+    const result2 = await NewUser.updateOne(
+      { _id: req.body.userUniqId},
+      { $push: { following: followingDetails } }
+    );
+    if (result.modifiedCount > 0 && result2.modifiedCount>0) {
+      res.status(200).json({ message: "Started following." });
+      //res.status(200).send(user);
+    }
+  }
+});
+
+router.post("/:id/following", async (req, res) => {
+  const user = await NewUser.findOne({ _id: req.params.id });
+  const followingOrNot = false;
+  if (user.following.length !== 0) {
+    user.following.forEach((element) => {
+      if (element.email === req.body.email) {
+        followingOrNot = true;
+      }
+    });
+  }
+
+  if (followingOrNot) {
+    res.status(203).json({ message: "Alerady following. " });
+  } else {
+    const result = await NewUser.updateOne(
+      { _id: req.params.id },
+      { $push: { following: req.body } }
+    );
+    if (result.modifiedCount > 0) {
+      res.status(200).json({ message: "Started following." });
+    }
+  }
+});
 
 module.exports = router;

@@ -211,7 +211,20 @@ router.post("/:id/follower", async (req, res) => {
     });
   }
   if (followerOrNot) {
-    res.status(203).json({ message: "Alerady following. " });
+
+    const result = await NewUser.updateOne(
+      { _id: req.params.id },
+      { $pull: { followers:{"userUniqId": req.body.userUniqId}  } }
+    );
+    const result2 = await NewUser.updateOne(
+      { _id: req.body.userUniqId},
+      { $pull: { following: {"userUniqId": followingDetails.userUniqId} } }
+    );
+    if (result.modifiedCount > 0 && result2.modifiedCount>0) {
+      res.status(200).json({ message: "Started Unfollowing." });
+      //res.status(200).send(user);
+    }
+    
   } else {
     const result = await NewUser.updateOne(
       { _id: req.params.id },
@@ -241,6 +254,9 @@ router.post("/:id/following", async (req, res) => {
 
   if (followingOrNot) {
     res.status(203).json({ message: "Alerady following. " });
+
+
+
   } else {
     const result = await NewUser.updateOne(
       { _id: req.params.id },
